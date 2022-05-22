@@ -1,0 +1,13 @@
+#node
+node_modules
+
+#IDE
+.idea
+
+#Compiled files
+lib
+
+#Test files
+generathor.config.js
+templates
+result
