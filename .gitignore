@@ -9,5 +9,5 @@ lib
 
 #Test files
 generathor.config.js
-templates
+/templates
 result

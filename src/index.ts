@@ -1,3 +1,2 @@
-export * from './template';
-export * from './arraySource';
-export * from './source';
+export * from './generators';
+export * from './sources';
