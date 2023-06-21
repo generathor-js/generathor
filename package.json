@@ -1,6 +1,6 @@
 {
   "name": "generathor",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Use this to generate whatever you want from whatever",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -11,7 +11,9 @@
   "scripts": {
     "build": "tsc"
   },
-  "files": ["lib/**/*"],
+  "files": [
+    "lib/**/*"
+  ],
   "author": "Diego Michelena",
   "license": "MIT",
   "bin": {

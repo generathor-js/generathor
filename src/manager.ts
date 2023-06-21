@@ -48,7 +48,11 @@ export class Manager {
 
   private processGeneratorForCollection(generator: GeneratorForCollection, source: Source) {
     const templateHandler = this.compile(generator.template());
-    const output = templateHandler(source.items());
+    const output = templateHandler(
+      generator.prepareItems(
+        source.items()
+      )
+    );
     File.write(
       generator.file(),
       output
@@ -63,7 +67,8 @@ export class Manager {
 
   private processGeneratorForItem(generator: GeneratorForItem, source: Source) {
     const templateHandler = this.compile(generator.template());
-    for (const item of source.items()) {
+    const items = generator.prepareItems(source.items());
+    for (const item of items) {
       const output = templateHandler(item);
       File.write(
         File.completePath(

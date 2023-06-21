@@ -1,10 +1,10 @@
-import {File} from '../helpers/file';
-
+type Item = Record<string, any>;
 type GeneratorForItemOptions = {
   template: string;
   directory: string;
   source: string;
-  fileName: (item: Record<string, any>) => string;
+  prepareItems?: (items: Item[]) => Item[];
+  fileName: (item: Item) => string;
 };
 
 export class GeneratorForItem {
@@ -19,6 +19,10 @@ export class GeneratorForItem {
 
   public template() {
     return this.$options.template;
+  }
+
+  public prepareItems(items: Item[]) {
+    return this.$options.prepareItems ? this.$options.prepareItems(items) : items;
   }
 
   public directory() {

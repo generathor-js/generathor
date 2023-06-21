@@ -1,9 +1,11 @@
 import {File} from '../helpers/file';
 
+type Item = Record<string, any>;
 type GeneratorForCollectionOptions = {
   template: string;
   file: string;
   source: string;
+  prepareItems?: (items: Item[]) => Item[];
 };
 
 export class GeneratorForCollection {
@@ -22,6 +24,10 @@ export class GeneratorForCollection {
 
   public file() {
     return this.$options.file;
+  }
+
+  public prepareItems(items: Item[]) {
+    return this.$options.prepareItems ? this.$options.prepareItems(items) : items;
   }
 
   public directory() {
