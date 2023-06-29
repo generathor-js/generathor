@@ -1,6 +1,6 @@
 {
   "name": "generathor",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Use this to generate whatever you want from whatever",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

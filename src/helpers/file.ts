@@ -22,7 +22,8 @@ export class File {
     if (!File.isAbsolute(file)) {
       file = File.toAbsolute(file);
     }
-    fs.writeFileSync(File.toAbsolute(file), content);
+    File.createDirectoryIfNotExists(File.directory(file));
+    fs.writeFileSync(file, content);
     console.log(`File created: ${file}`);
   }
 
