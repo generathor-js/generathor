@@ -61,7 +61,7 @@ Generators use the data from sources to create files using [handlebars](https://
 new GeneratorForCollection({
   template: './template.handlebars',
   source: 'custom',
-  file: './output.csv',
+  file: './collection.txt',
   prepareItems(items) {
     return items.map(item => ({
       ...item,
