@@ -1,4 +1,5 @@
-type Item = Record<string, any>;
+import { Item } from '../sources/source';
+
 type GeneratorForItemOptions = {
   template: string;
   directory: string;
@@ -8,28 +9,27 @@ type GeneratorForItemOptions = {
 };
 
 export class GeneratorForItem {
-  public constructor(
-    private $options: GeneratorForItemOptions
-  )
-  {}
+  public constructor(private $options: GeneratorForItemOptions) {}
 
-  public source() {
+  public source(): string {
     return this.$options.source;
   }
 
-  public template() {
+  public template(): string {
     return this.$options.template;
   }
 
   public prepareItems(items: Item[]) {
-    return this.$options.prepareItems ? this.$options.prepareItems(items) : items;
+    return this.$options.prepareItems
+      ? this.$options.prepareItems(items)
+      : items;
   }
 
-  public directory() {
+  public directory(): string {
     return this.$options.directory;
   }
 
-  public fileName(item) {
+  public fileName(item: Item): string {
     return this.$options.fileName(item);
   }
 }

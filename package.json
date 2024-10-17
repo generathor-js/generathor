@@ -1,27 +1,38 @@
 {
   "name": "generathor",
   "version": "1.0.8",
-  "description": "Use this to generate whatever you want from whatever",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "description": "Generate files from templates and data sources automatically.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git://github.com/dmichelena/generathor.git"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "format": "prettier --write 'src/**/*.{ts,tsx}'",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "prepare": "husky"
   },
   "files": [
-    "lib/**/*"
+    "dist/**/*"
   ],
-  "author": "Diego Michelena",
+  "author": "Diego Michelena Polo",
   "license": "MIT",
   "bin": {
-    "generathor": "./lib/runner.js"
+    "generathor": "./dist/runner.js"
   },
   "devDependencies": {
-    "@types/node": "^17.0.31",
-    "typescript": "^4.6.4"
+    "@eslint/js": "^9.12.0",
+    "@types/args": "^5.0.3",
+    "@types/node": "^22.7.6",
+    "eslint": "^9.12.0",
+    "globals": "^15.11.0",
+    "husky": "^9.1.6",
+    "prettier": "^3.3.3",
+    "typescript": "^4.6.4",
+    "typescript-eslint": "^8.9.0"
   },
   "dependencies": {
     "args": "^5.0.3",

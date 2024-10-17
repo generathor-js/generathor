@@ -1,13 +1,13 @@
-import {File} from './helpers/file';
-import {GeneratorForCollection, GeneratorForItem} from './generators';
-import {Source} from './sources';
-import {default as handlebars} from 'handlebars';
+import { File } from './helpers/file';
+import { GeneratorForCollection, GeneratorForItem } from './generators';
+import { Source } from './sources';
+import { default as handlebars } from 'handlebars';
 type Generator = GeneratorForCollection | GeneratorForItem;
 
 export class Manager {
   constructor(
     private sources: Record<string, Source>,
-    private generators: Record<string, Generator>,
+    private generators: Record<string, Generator>
   ) {}
 
   public async generate(generators?: string) {
@@ -43,26 +43,20 @@ export class Manager {
       return this.processGeneratorForCollection(generatorObject, source);
     }
 
-    return this.processGeneratorForItem(generatorObject, source)
+    return this.processGeneratorForItem(generatorObject, source);
   }
 
-  private processGeneratorForCollection(generator: GeneratorForCollection, source: Source) {
+  private processGeneratorForCollection(
+    generator: GeneratorForCollection,
+    source: Source
+  ) {
     const templateHandler = this.compile(generator.template());
-    const output = templateHandler(
-      generator.prepareItems(
-        source.items()
-      )
-    );
-    File.write(
-      generator.file(),
-      output
-    );
+    const output = templateHandler(generator.prepareItems(source.items()));
+    File.write(generator.file(), output);
   }
 
   private compile(file: string) {
-    return handlebars.compile(
-      File.read(file)
-    );
+    return handlebars.compile(File.read(file));
   }
 
   private processGeneratorForItem(generator: GeneratorForItem, source: Source) {
@@ -71,10 +65,7 @@ export class Manager {
     for (const item of items) {
       const output = templateHandler(item);
       File.write(
-        File.completePath(
-          generator.directory(),
-          generator.fileName(item)
-        ),
+        File.completePath(generator.directory(), generator.fileName(item)),
         output
       );
     }
@@ -87,7 +78,9 @@ export class Manager {
   }
 
   private processInput(generators?: string) {
-    const generatorsToProcess = generators ? generators.split(' ') : Object.keys(this.generators);
+    const generatorsToProcess = generators
+      ? generators.split(' ')
+      : Object.keys(this.generators);
     const requiredSources: Record<string, boolean> = {};
 
     for (const generator of generatorsToProcess) {
@@ -109,5 +102,3 @@ export class Manager {
     };
   }
 }
-
-

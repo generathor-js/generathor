@@ -1,6 +1,6 @@
-import {File} from '../helpers/file';
+import { File } from '../helpers/file';
+import { Item } from '../sources/source';
 
-type Item = Record<string, any>;
 type GeneratorForCollectionOptions = {
   template: string;
   file: string;
@@ -9,25 +9,24 @@ type GeneratorForCollectionOptions = {
 };
 
 export class GeneratorForCollection {
-  public constructor(
-    private $options: GeneratorForCollectionOptions
-  )
-  {}
+  public constructor(private $options: GeneratorForCollectionOptions) {}
 
-  public source() {
+  public source(): string {
     return this.$options.source;
   }
 
-  public template() {
+  public template(): string {
     return this.$options.template;
   }
 
-  public file() {
+  public file(): string {
     return this.$options.file;
   }
 
   public prepareItems(items: Item[]) {
-    return this.$options.prepareItems ? this.$options.prepareItems(items) : items;
+    return this.$options.prepareItems
+      ? this.$options.prepareItems(items)
+      : items;
   }
 
   public directory() {
