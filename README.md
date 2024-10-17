@@ -1,97 +1,174 @@
-![Generathor Logo](https://cldup.com/U-06c9VkSH.png)
+<p align="center">
+  <img src="https://cldup.com/U-06c9VkSH.png" alt="Generathor">
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/generathor">
+    <img src="https://img.shields.io/npm/v/generathor.svg" alt="NPM">
+  </a>
+  <a href="https://npmcharts.com/compare/generathor?minimal=true">
+    <img src="https://img.shields.io/npm/dt/generathor.svg" alt="Downloads">
+  </a>
+  <a href="https://www.npmjs.com/package/generathor">
+    <img src="https://img.shields.io/npm/l/generathor.svg" alt="License">
+  </a>
+</p>
 
 # Generathor
 
-Generathor is a tool to create files based on different sources.
+**Generathor** helps you automatically generate files from various data sources using templates. It saves time and prevents manual errors in repetitive tasks.
 
-# Why use Generathor?
+## Why use Generathor?
 
-When you create multiple files based on something you can make some mistakes. So, the best way to create those files is to find a way to create them automatically.
+Manual file creation can lead to mistakes. Generathor automates this process, ensuring accuracy and speeding up the workflow.
 
-# How does it work?
+## How does it work?
 
-There are two things to keep in mind for Generathor to work: **Sources** and **Templates**.
+Generathor is built around two main components: **Sources** and **Generators**.
 
-## Sources
+### Sources
 
-We use sources to load data. To create new ways to load data, you need to create a class that extends our base Source class.
+Sources provide the data for generating files. You can create custom sources by extending the `Source` class.
 
-```js
-const { Source } = require("generathor");
+```ts
+import { Source } from 'generathor';
 
-class DBSource extends Source {
+class CustomSource extends Source {
   constructor() {
     super();
   }
 
-  async load() {
-    //Code here
+  public async load(): Promise<void> {
+    this.$items = await this.fetchData(); // Load your data here
   }
 
-  items() {
+  public items(): Item[] {
     return this.$items;
   }
-
 }
-``` 
+```
 
-## Templates
+### Generators
 
-In order to create one file or one group of files you need to specify one template, and you can set more than one template to process.
-You need to associate the template with some source, and create the template file using [handlebars](https://handlebarsjs.com/). 
+Generators use the data from sources to create files using [handlebars](https://handlebarsjs.com/) templates. There are two types:
 
-# Using Generathor
+- **GeneratorForCollection**: Creates one file for a collection of items.
+- **GeneratorForItem**: Creates individual files for each item.
 
-1. Installation
-    ```bash
-    $ npm i -D generathor
-    ```
-    
-2. Create **generathor.config.js** in root path
-    ```js
-    const path = require('path');
-    const { ArraySource, TemplateForItem, TemplateForItemGroup } = require('generathor');
+#### Example for GeneratorForCollection:
 
-    module.exports = {
-      sources: {
-        db: new ArraySource([
-          {
-            table: 'table_1',
-            columns: ['id', 'name'],
-          },
-          {
-            table: 'table_2',
-            columns: ['id', 'status'],
-          }
-        ])
-      },
-      templates: {
-        models: new TemplateForItemGroup({
-          template: './templates/export-models.handlebars',
-          source: 'db',
-          file: './result/index.js',
-        }),
-        'export-models': new TemplateForItem({
-          template: path.resolve('./templates/model.handlebars'),
-          source: 'db',
-          directory: path.resolve('./result'),
-          fileName(item) {
-            return item.table + '.js';
-          },
-        }),
-      },
-    };
-    ```
+```ts
+new GeneratorForCollection({
+  template: './template.handlebars',
+  source: 'custom',
+  file: './output.csv',
+  prepareItems(items) {
+    return items.map(item => ({
+      ...item,
+      transformed: item.name.toUpperCase(), // Example transformation
+    }));
+  }
+});
+```
 
-3. Run the script
-    ```bash
-    $ generathor
-    ```
-    To check more options run:
-    ```bash
-    $ generathor --help
-    ```
+#### Configuration
 
-# Ecosystem
+| Variable       | Required | Description                                                            |
+|----------------|----------|------------------------------------------------------------------------|
+| `template`     | `Yes`    | The template to use.                                                   |
+| `source`       | `Yes`    | The source to use to load the items.                                   |
+| `file`         | `Yes`    | The file to write the output to.                                       |
+| `prepareItems` | `No`     | Callback to modify the items before using them to generate the output. |
 
-TBD
+This will generate a single file (`collection.txt`) for all the items in your source.
+
+#### Example for GeneratorForItem:
+
+```ts
+new GeneratorForItem({
+  template: './templates/item.handlebars',
+  source: 'custom',
+  directory: './output/items',
+  fileName(item) {
+    return `${item.id}.txt`;
+  },
+  prepareItems(items) {
+    return items.map(item => ({
+      ...item,
+      transformed: item.name.toUpperCase(), // Example transformation
+    }));
+  }
+});
+```
+
+#### Configuration
+
+| Variable       | Required | Description                                                            |
+|----------------|----------|------------------------------------------------------------------------|
+| `template`     | `Yes`    | The template to use.                                                   |
+| `directory`    | `Yes`    | The directory to write the output to.                                  |
+| `source`       | `Yes`    | The source to use to load the items.                                   |
+| `fileName`     | `Yes`    | Callback to get the file name for each item.                           |
+| `prepareItems` | `No`     | Callback to modify the items before using them to generate the output. |
+
+This will create one file per item in the source (e.g., `1.txt`, `2.txt`, etc.).
+
+## How to use Generathor
+
+1. **Install** Generathor:
+   ```bash
+   $ npm i -D generathor
+   ```
+
+2. **Configure** by creating a `generathor.config.js` file at your project root:
+   ```js
+   const path = require('path');
+   const { ArraySource, GeneratorForItem, GeneratorForCollection } = require('generathor');
+
+   module.exports = {
+     sources: {
+       db: new ArraySource([
+         { table: 'table_1', columns: ['id', 'name'] },
+         { table: 'table_2', columns: ['id', 'status'] },
+       ]),
+     },
+     templates: {
+       models: new GeneratorForCollection({
+         template: './templates/export-models.handlebars',
+         source: 'db',
+         file: './result/index.js',
+       }),
+       'export-models': new GeneratorForItem({
+         template: path.resolve('./templates/model.handlebars'),
+         source: 'db',
+         directory: path.resolve('./result'),
+         fileName(item) {
+           return item.table + '.js';
+         },
+       }),
+     },
+   };
+   ```
+
+3. **Run**:
+   ```bash
+   $ generathor
+   ```
+
+   To see more options:
+   ```bash
+   $ generathor --help
+   ```
+
+## Ecosystem
+
+Explore related packages:
+
+- [generathor-db](https://www.npmjs.com/package/generathor-db)
+- [generathor-laravel](https://www.npmjs.com/package/generathor-laravel)
+
+## TODO
+
+- [ ] Add objection js generators - WIP
+- [ ] Add support for the overwriteFiles configuration option.
+- [ ] Add more sources (API, CSV, etc.)
