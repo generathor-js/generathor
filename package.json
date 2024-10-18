@@ -1,12 +1,12 @@
 {
   "name": "generathor",
-  "version": "1.0.8",
+  "version": "1.0.11",
   "description": "Generate files from templates and data sources automatically.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git://github.com/dmichelena/generathor.git"
+    "url": "git://github.com/generathor-js/generathor"
   },
   "scripts": {
     "build": "tsc",
