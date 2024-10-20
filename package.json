@@ -28,7 +28,6 @@
     "@types/args": "^5.0.3",
     "@types/node": "^22.7.6",
     "eslint": "^9.12.0",
-    "globals": "^15.11.0",
     "husky": "^9.1.6",
     "prettier": "^3.3.3",
     "typescript": "^4.6.4",
