@@ -4,6 +4,7 @@ type GeneratorForItemOptions = {
   template: string;
   directory: string;
   source: string;
+  overwriteFiles?: boolean;
   prepareItems?: (items: Item[]) => Item[];
   fileName: (item: Item) => string;
 };
@@ -13,6 +14,10 @@ export class GeneratorForItem {
 
   public source(): string {
     return this.$options.source;
+  }
+
+  public overwriteFiles() {
+    return this.$options.overwriteFiles ?? true;
   }
 
   public template(): string {

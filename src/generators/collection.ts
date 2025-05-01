@@ -5,6 +5,7 @@ type GeneratorForCollectionOptions = {
   template: string;
   file: string;
   source: string;
+  overwriteFiles?: boolean;
   prepareItems?: (items: Item[]) => Item[];
 };
 
@@ -13,6 +14,10 @@ export class GeneratorForCollection {
 
   public source(): string {
     return this.$options.source;
+  }
+
+  public overwriteFiles() {
+    return this.$options.overwriteFiles ?? true;
   }
 
   public template(): string {

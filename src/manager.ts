@@ -50,9 +50,13 @@ export class Manager {
     generator: GeneratorForCollection,
     source: Source
   ) {
+    const file = generator.file();
+    if (File.exists(file) && !generator.overwriteFiles()) {
+      return;
+    }
     const templateHandler = this.compile(generator.template());
     const output = templateHandler(generator.prepareItems(source.items()));
-    File.write(generator.file(), output);
+    File.write(file, output);
   }
 
   private compile(file: string) {
@@ -62,12 +66,17 @@ export class Manager {
   private processGeneratorForItem(generator: GeneratorForItem, source: Source) {
     const templateHandler = this.compile(generator.template());
     const items = generator.prepareItems(source.items());
+    const overwriteFiles = generator.overwriteFiles();
     for (const item of items) {
-      const output = templateHandler(item);
-      File.write(
-        File.completePath(generator.directory(), generator.fileName(item)),
-        output
+      const file = File.completePath(
+        generator.directory(),
+        generator.fileName(item)
       );
+      if (File.exists(file) && !overwriteFiles) {
+        continue;
+      }
+      const output = templateHandler(item);
+      File.write(file, output);
     }
   }
 

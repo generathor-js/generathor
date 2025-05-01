@@ -2,12 +2,12 @@ import path from 'path';
 import fs from 'fs';
 
 export class File {
-  public static directoryExists(directory: string) {
-    return fs.existsSync(directory);
-  }
-
   public static read(file: string) {
     return fs.readFileSync(file, 'utf-8');
+  }
+
+  public static exists(file: string) {
+    return fs.existsSync(file);
   }
 
   public static directory(file: string) {
@@ -44,7 +44,7 @@ export class File {
     if (!File.isAbsolute(directory)) {
       directory = File.toAbsolute(directory);
     }
-    if (!File.directoryExists(directory)) {
+    if (!File.exists(directory)) {
       File.createDirectory(directory);
     }
   }

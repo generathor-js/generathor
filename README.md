@@ -62,6 +62,7 @@ new GeneratorForCollection({
   template: './template.handlebars',
   source: 'custom',
   file: './collection.txt',
+  overwriteFiles: false,
   prepareItems(items) {
     return items.map(item => ({
       ...item,
@@ -73,12 +74,13 @@ new GeneratorForCollection({
 
 #### Configuration
 
-| Variable       | Required | Description                                                            |
-|----------------|----------|------------------------------------------------------------------------|
-| `template`     | `Yes`    | The template to use.                                                   |
-| `source`       | `Yes`    | The source to use to load the items.                                   |
-| `file`         | `Yes`    | The file to write the output to.                                       |
-| `prepareItems` | `No`     | Callback to modify the items before using them to generate the output. |
+| Variable         | Required | Description                                                            |
+|------------------|----------|------------------------------------------------------------------------|
+| `template`       | `Yes`    | The template to use.                                                   |
+| `source`         | `Yes`    | The source to use to load the items.                                   |
+| `file`           | `Yes`    | The file to write the output to.                                       |
+| `overwriteFiles` | `No`     | Whether to overwrite existing files (`true` by default).               |
+| `prepareItems`   | `No`     | Callback to modify the items before using them to generate the output. |
 
 This will generate a single file (`collection.txt`) for all the items in your source.
 
@@ -103,13 +105,14 @@ new GeneratorForItem({
 
 #### Configuration
 
-| Variable       | Required | Description                                                            |
-|----------------|----------|------------------------------------------------------------------------|
-| `template`     | `Yes`    | The template to use.                                                   |
-| `directory`    | `Yes`    | The directory to write the output to.                                  |
-| `source`       | `Yes`    | The source to use to load the items.                                   |
-| `fileName`     | `Yes`    | Callback to get the file name for each item.                           |
-| `prepareItems` | `No`     | Callback to modify the items before using them to generate the output. |
+| Variable         | Required | Description                                                            |
+|------------------|----------|------------------------------------------------------------------------|
+| `template`       | `Yes`    | The template to use.                                                   |
+| `directory`      | `Yes`    | The directory to write the output to.                                  |
+| `source`         | `Yes`    | The source to use to load the items.                                   |
+| `fileName`       | `Yes`    | Callback to get the file name for each item.                           |
+| `overwriteFiles` | `No`     | Whether to overwrite existing files (`true` by default).               |
+| `prepareItems`   | `No`     | Callback to modify the items before using them to generate the output. |
 
 This will create one file per item in the source (e.g., `1.txt`, `2.txt`, etc.).
 
@@ -132,7 +135,7 @@ This will create one file per item in the source (e.g., `1.txt`, `2.txt`, etc.).
          { table: 'table_2', columns: ['id', 'status'] },
        ]),
      },
-     templates: {
+     generators: {
        models: new GeneratorForCollection({
          template: './templates/export-models.handlebars',
          source: 'db',
@@ -170,5 +173,4 @@ Explore related packages:
 ## TODO
 
 - [ ] Add objection js generators - WIP
-- [ ] Add support for the overwriteFiles configuration option.
 - [ ] Add more sources (API, CSV, etc.)
