@@ -1,4 +1,12 @@
+.agents
+.husky
+node_modules
 src
+.gitignore
+biome.json
+bunup.config.ts
+eslint.config.ts
+generathor.config.*
+skills-lock.json
 tsconfig.json
-.prettierrc
-eslint.config.mjs
+vitest.config.ts

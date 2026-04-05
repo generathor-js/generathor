@@ -1,14 +1,16 @@
-type AllTypes =
-  | null
-  | undefined
-  | boolean
-  | number
-  | string
-  | { [key: string]: AllTypes }
-  | AllTypes[];
+export type AllTypes =
+	| null
+	| undefined
+	| boolean
+	| number
+	| string
+	| { [key: string]: AllTypes }
+	| Array<AllTypes>;
+
 export type Item = Record<string, AllTypes>;
+
 export abstract class Source {
-  protected $items: Item[] = [];
-  public abstract load(): Promise<void>;
-  public abstract items(): Item[];
+	protected itemsList: Array<Item> = [];
+	public abstract load(): Promise<void>;
+	public abstract get items(): Array<Item>;
 }

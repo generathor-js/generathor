@@ -1,51 +1,54 @@
-import path from 'path';
-import fs from 'fs';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import pc from 'picocolors';
 
-export class File {
-  public static read(file: string) {
-    return fs.readFileSync(file, 'utf-8');
-  }
+export async function readFile(file: string): Promise<string> {
+	return await fs.readFile(file, 'utf-8');
+}
 
-  public static exists(file: string) {
-    return fs.existsSync(file);
-  }
+export async function fileExists(file: string): Promise<boolean> {
+	try {
+		await fs.access(file);
+		return true;
+	} catch {
+		return false;
+	}
+}
 
-  public static directory(file: string) {
-    return path.dirname(file);
-  }
+export function getDirectory(file: string): string {
+	return path.dirname(file);
+}
 
-  public static completePath(directory: string, file: string) {
-    return `${directory}${path.sep}${file}`;
-  }
+export function joinPath(directory: string, file: string): string {
+	return `${directory}${path.sep}${file}`;
+}
 
-  public static write(file: string, content: string) {
-    if (!File.isAbsolute(file)) {
-      file = File.toAbsolute(file);
-    }
-    File.createDirectoryIfNotExists(File.directory(file));
-    fs.writeFileSync(file, content);
-    console.log(`File created: ${file}`);
-  }
+export async function writeFile(file: string, content: string): Promise<void> {
+	if (!isAbsolutePath(file)) {
+		file = getAbsolutePath(file);
+	}
+	await ensureDirectoryExists(getDirectory(file));
+	await fs.writeFile(file, content);
+	console.log(`${pc.gray('│')}  File created: ${file}`);
+}
 
-  public static createDirectory(directory: string) {
-    fs.mkdirSync(directory, { recursive: true });
-    console.log(`Directory created: ${directory}`);
-  }
+export async function createDirectory(directory: string): Promise<void> {
+	await fs.mkdir(directory, { recursive: true });
+}
 
-  public static isAbsolute(file: string) {
-    return path.isAbsolute(file);
-  }
+export function isAbsolutePath(file: string): boolean {
+	return path.isAbsolute(file);
+}
 
-  public static toAbsolute(file: string) {
-    return path.resolve(file);
-  }
+export function getAbsolutePath(file: string): string {
+	return path.resolve(file);
+}
 
-  public static createDirectoryIfNotExists(directory: string) {
-    if (!File.isAbsolute(directory)) {
-      directory = File.toAbsolute(directory);
-    }
-    if (!File.exists(directory)) {
-      File.createDirectory(directory);
-    }
-  }
+export async function ensureDirectoryExists(directory: string): Promise<void> {
+	if (!isAbsolutePath(directory)) {
+		directory = getAbsolutePath(directory);
+	}
+	if (!(await fileExists(directory))) {
+		await createDirectory(directory);
+	}
 }

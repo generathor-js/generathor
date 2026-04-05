@@ -1,2 +1,2 @@
-export * from './generators';
-export * from './sources';
+export * from './generators/index.ts';
+export * from './sources/index.ts';

@@ -1,2 +1,2 @@
-export * from './array';
-export * from './source';
+export * from './array.ts';
+export * from './source.ts';

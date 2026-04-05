@@ -8,6 +8,10 @@ node_modules
 dist
 
 #Test files
-generathor.config.js
-/templates
-result
+coverage
+generathor.config.*
+templates
+output
+
+#Others
+.npmrc

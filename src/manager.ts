@@ -1,113 +1,118 @@
-import { File } from './helpers/file';
-import { GeneratorForCollection, GeneratorForItem } from './generators';
-import { Source } from './sources';
-import { default as handlebars } from 'handlebars';
+import ejs, { type TemplateFunction } from 'ejs';
+import { GeneratorForCollection, type GeneratorForItem } from './generators/index.ts';
+import {
+	ensureDirectoryExists,
+	fileExists,
+	joinPath,
+	readFile,
+	writeFile,
+} from './helpers/file.ts';
+import type { Source } from './sources/index.ts';
+
 type Generator = GeneratorForCollection | GeneratorForItem;
 
-export class Manager {
-  constructor(
-    private sources: Record<string, Source>,
-    private generators: Record<string, Generator>
-  ) {}
+export class GeneratorEngine {
+	constructor(
+		private readonly sources: Record<string, Source>,
+		private readonly generators: Record<string, Generator>,
+	) {}
 
-  public async generate(generators?: string) {
-    const processInput = this.processInput(generators);
-    this.createDirectories(processInput.generators);
-    await this.loadSources(processInput.sources);
-    await this.processGenerators(processInput.generators);
-  }
+	public async generate(targetGeneratorNames?: string): Promise<void> {
+		const executionTargets = this.resolveExecutionTargets(targetGeneratorNames);
+		await this.ensureOutputDirectories(executionTargets.generators);
+		await this.loadDataSources(executionTargets.sources);
+		await this.executeGenerators(executionTargets.generators);
+	}
 
-  private loadSources(sources: string[]) {
-    const ps = [];
-    for (const source of sources) {
-      ps.push(this.sources[source].load());
-    }
+	private loadDataSources(sources: Array<string>): Promise<Array<void>> {
+		return Promise.all(sources.map((source) => (this.sources[source] as Source).load()));
+	}
 
-    return Promise.all(ps);
-  }
+	private executeGenerators(generators: Array<string>): Promise<Array<void>> {
+		return Promise.all(generators.map((generator) => this.processGenerator(generator)));
+	}
 
-  private processGenerators(generators: string[]) {
-    const ps = [];
-    for (const generator of generators) {
-      ps.push(this.processGenerator(generator));
-    }
+	private async processGenerator(generator: string): Promise<void> {
+		const generatorObject = this.generators[generator] as Generator;
+		const source = this.sources[generatorObject.source] as Source;
 
-    return Promise.all(ps);
-  }
+		if (generatorObject instanceof GeneratorForCollection) {
+			await this.executeCollectionGenerator(generatorObject, source);
+			return;
+		}
 
-  private async processGenerator(generator: string) {
-    const generatorObject = this.generators[generator];
-    const source = this.sources[generatorObject.source()];
+		await this.executeItemGenerator(generatorObject, source);
+	}
 
-    if (generatorObject instanceof GeneratorForCollection) {
-      return this.processGeneratorForCollection(generatorObject, source);
-    }
+	private async executeCollectionGenerator(
+		generator: GeneratorForCollection,
+		source: Source,
+	): Promise<void> {
+		const file = generator.file;
+		if ((await fileExists(file)) && !generator.overwriteFiles) {
+			return;
+		}
+		const templateHandler = await this.compile(generator.template);
+		const output = templateHandler(generator.prepareItems(source.items));
+		await writeFile(file, output);
+	}
 
-    return this.processGeneratorForItem(generatorObject, source);
-  }
+	private async compile(file: string): Promise<TemplateFunction> {
+		const content = await readFile(file);
+		return ejs.compile(content);
+	}
 
-  private processGeneratorForCollection(
-    generator: GeneratorForCollection,
-    source: Source
-  ) {
-    const file = generator.file();
-    if (File.exists(file) && !generator.overwriteFiles()) {
-      return;
-    }
-    const templateHandler = this.compile(generator.template());
-    const output = templateHandler(generator.prepareItems(source.items()));
-    File.write(file, output);
-  }
+	private async executeItemGenerator(generator: GeneratorForItem, source: Source): Promise<void> {
+		const templateHandler = await this.compile(generator.template);
+		const items = generator.prepareItems(source.items);
+		const overwriteFiles = generator.overwriteFiles;
 
-  private compile(file: string) {
-    return handlebars.compile(File.read(file));
-  }
+		await Promise.all(
+			items.map(async (item) => {
+				const file = joinPath(generator.directory, generator.fileName(item));
+				if ((await fileExists(file)) && !overwriteFiles) {
+					return;
+				}
+				const output = templateHandler(item);
+				await writeFile(file, output);
+			}),
+		);
+	}
 
-  private processGeneratorForItem(generator: GeneratorForItem, source: Source) {
-    const templateHandler = this.compile(generator.template());
-    const items = generator.prepareItems(source.items());
-    const overwriteFiles = generator.overwriteFiles();
-    for (const item of items) {
-      const file = File.completePath(
-        generator.directory(),
-        generator.fileName(item)
-      );
-      if (File.exists(file) && !overwriteFiles) {
-        continue;
-      }
-      const output = templateHandler(item);
-      File.write(file, output);
-    }
-  }
+	private async ensureOutputDirectories(generators: Array<string>): Promise<Array<void>> {
+		return await Promise.all(
+			generators.map((generator) =>
+				ensureDirectoryExists((this.generators[generator] as Generator).directory),
+			),
+		);
+	}
 
-  private createDirectories(generators: string[]) {
-    for (const generator of generators) {
-      File.createDirectoryIfNotExists(this.generators[generator].directory());
-    }
-  }
+	private resolveExecutionTargets(targetGeneratorNames?: string): {
+		generators: Array<string>;
+		sources: Array<string>;
+	} {
+		const generatorsToProcess =
+			targetGeneratorNames === undefined
+				? Object.keys(this.generators)
+				: targetGeneratorNames.split(' ');
+		const requiredSources: Record<string, boolean> = {};
 
-  private processInput(generators?: string) {
-    const generatorsToProcess = generators
-      ? generators.split(' ')
-      : Object.keys(this.generators);
-    const requiredSources: Record<string, boolean> = {};
+		for (const generator of generatorsToProcess) {
+			if (!this.generators[generator]) {
+				throw new Error(`Generators "${generator}" is not defined.`);
+			}
+			requiredSources[this.generators[generator].source] = true;
+		}
 
-    for (const generator of generatorsToProcess) {
-      if (!this.generators[generator]) {
-        throw new Error(`Generators "${generator}" is not defined.`);
-      }
-      requiredSources[this.generators[generator].source()] = true;
-    }
+		for (const source in requiredSources) {
+			if (!this.sources[source]) {
+				throw new Error(`Source "${source}" is not defined.`);
+			}
+		}
 
-    for (const source in requiredSources) {
-      if (!this.sources[source]) {
-        throw new Error(`Source "${source}" is not defined.`);
-      }
-    }
-
-    return {
-      generators: generatorsToProcess,
-      sources: Object.keys(requiredSources),
-    };
-  }
+		return {
+			generators: generatorsToProcess,
+			sources: Object.keys(requiredSources),
+		};
+	}
 }

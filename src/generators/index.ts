@@ -1,2 +1,2 @@
-export * from './collection';
-export * from './item';
+export * from './collection.ts';
+export * from './item.ts';

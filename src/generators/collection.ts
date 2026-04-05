@@ -1,40 +1,38 @@
-import { File } from '../helpers/file';
-import { Item } from '../sources/source';
+import { getDirectory } from '../helpers/file.ts';
+import type { Item } from '../sources/index.ts';
 
 type GeneratorForCollectionOptions = {
-  template: string;
-  file: string;
-  source: string;
-  overwriteFiles?: boolean;
-  prepareItems?: (items: Item[]) => Item[];
+	template: string;
+	file: string;
+	source: string;
+	overwriteFiles?: boolean;
+	prepareItems?: (items: Array<Item>) => Array<Item>;
 };
 
 export class GeneratorForCollection {
-  public constructor(private $options: GeneratorForCollectionOptions) {}
+	public constructor(private readonly options: GeneratorForCollectionOptions) {}
 
-  public source(): string {
-    return this.$options.source;
-  }
+	public get source(): string {
+		return this.options.source;
+	}
 
-  public overwriteFiles() {
-    return this.$options.overwriteFiles ?? true;
-  }
+	public get overwriteFiles(): boolean {
+		return this.options.overwriteFiles ?? true;
+	}
 
-  public template(): string {
-    return this.$options.template;
-  }
+	public get template(): string {
+		return this.options.template;
+	}
 
-  public file(): string {
-    return this.$options.file;
-  }
+	public get file(): string {
+		return this.options.file;
+	}
 
-  public prepareItems(items: Item[]) {
-    return this.$options.prepareItems
-      ? this.$options.prepareItems(items)
-      : items;
-  }
+	public prepareItems(items: Array<Item>): Array<Item> {
+		return this.options.prepareItems ? this.options.prepareItems(items) : items;
+	}
 
-  public directory() {
-    return File.directory(this.file());
-  }
+	public get directory(): string {
+		return getDirectory(this.file);
+	}
 }
